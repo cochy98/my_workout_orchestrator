@@ -10,7 +10,8 @@ const PORT = process.env.PORT ?? 3000;
 app.use(cors());
 app.use(express.json());
 
-app.use('/v1', chatRouter);
+// app.use('/v1', chatRouter);
+app.use(chatRouter);
 
 async function bootstrap() {
   try {

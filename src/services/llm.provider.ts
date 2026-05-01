@@ -40,7 +40,10 @@ async function streamOpenAI(
   messages: ConversationMessage[],
   systemPrompt?: string
 ): Promise<LLMResult> {
-  const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY ?? 'ollama',
+    baseURL: process.env.OPENAI_BASE_URL,
+  });
   const mcpTools = getDiscoveredTools();
   const toolLogs: unknown[] = [];
 
@@ -82,7 +85,7 @@ async function streamOpenAI(
 
       if (delta?.content) {
         currentText += delta.content;
-        sseWrite(res, 'delta', { text: delta.content });
+        sseWrite(res, 'delta', { chunk: delta.content });
       }
 
       if (delta?.tool_calls) {
@@ -202,7 +205,7 @@ async function streamAnthropic(
       if (event.type === 'content_block_delta') {
         if (event.delta.type === 'text_delta') {
           currentText += event.delta.text;
-          sseWrite(res, 'delta', { text: event.delta.text });
+          sseWrite(res, 'delta', { chunk: event.delta.text });
         }
         if (event.delta.type === 'input_json_delta' && currentToolUse) {
           currentToolUse.inputRaw += event.delta.partial_json;
